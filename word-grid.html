@@ -1,0 +1,1038 @@
+<html><head><base href=""><style> 
+  :root {
+    --primary: #5383ec;
+    --primary-dark: #3a6fd4;
+    --success: #34d399;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --background: #f0f7ff;
+    --card: #ffffff;
+    --text: #1f2937;
+    --border-radius: 12px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --modal-bg: rgba(0, 0, 0, 0.5);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: var(--background);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    max-width: 1000px;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .game-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 320px;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+  }
+
+  .status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .status-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .status-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .word-list {
+    width: 280px;
+    min-height: 400px;
+    background: var(--card);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .word-list h3 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+    font-size: 1.25rem;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.75rem;
+  }
+
+  .word-item {
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+    background: #f3f4f6;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: var(--transition);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .word-item:hover {
+    transform: translateX(5px);
+    background: #e5e7eb;
+  }
+
+  .word-score {
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    perspective: 1000px;
+  }
+
+  .cell {
+    width: 70px;
+    height: 70px;
+    background: var(--card);
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cell:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.1);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .cell:hover:before {
+    transform: translateY(0);
+  }
+
+  .cell:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    border-color: var(--primary);
+  }
+
+  .cell.selected {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary-dark);
+    transform: translateY(-5px) rotateX(10deg);
+    box-shadow: 0 8px 15px rgba(83, 131, 236, 0.3);
+  }
+
+  .controls {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+  }
+
+  button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  #start-btn {
+    background: var(--success);
+    color: white;
+    font-size: 1.25rem;
+    padding: 1rem 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #start-btn:hover:not(:disabled) {
+    background: #2ebe8b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(52, 211, 153, 0.4);
+  }
+
+  #submit-btn {
+    background: var(--primary);
+    color: white;
+    flex: 1;
+  }
+
+  #submit-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(83, 131, 236, 0.4);
+  }
+  
+  #submit-btn.processing {
+    position: relative;
+    color: transparent;
+  }
+  
+  #submit-btn.processing::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease infinite;
+    transform: translate(-50%, -50%);
+  }
+  
+  @keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  #reset-btn {
+    background: var(--danger);
+    color: white;
+  }
+
+  #reset-btn:hover:not(:disabled) {
+    background: #f05252;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(248, 113, 113, 0.4);
+  }
+
+  #word-display {
+    font-size: 1.25rem;
+    margin: 0.75rem 0;
+    min-height: 30px;
+    background: var(--card);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    text-align: center;
+    transition: var(--transition);
+  }
+
+  #message {
+    font-size: 1rem;
+    margin: 1rem 0;
+    min-height: 20px;
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+    opacity: 0;
+  }
+
+  #message.show {
+    opacity: 1;
+  }
+
+  #message.success {
+    background: rgba(52, 211, 153, 0.2);
+    color: #065f46;
+  }
+
+  #message.error {
+    background: rgba(248, 113, 113, 0.2);
+    color: #991b1b;
+  }
+
+.medal-container {
+    margin: 0.5rem 0;  
+    min-height: 0;     
+    height: auto;      
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+  @keyframes shine {
+    0% { filter: brightness(1) drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
+    50% { filter: brightness(1.3) drop-shadow(0 0 12px rgba(255,255,255,0.8)); }
+    100% { filter: brightness(1) drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
+  }
+
+  .medal-svg {
+    animation: shine 2s infinite;
+  }
+
+  .blur-before-start {
+    filter: blur(3px);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .game-started .blur-before-start {
+    filter: none;
+    opacity: 1;
+    pointer-events: all;
+    transition: all 0.5s ease;
+  }
+
+  .author-credit {
+    margin-top: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+
+  .found-words-container {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .found-words-container::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .found-words-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .found-words-container::-webkit-scrollbar-thumb {
+    background: #c5d1eb;
+    border-radius: 10px;
+  }
+
+  .found-words-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+
+  /* Progress bar for timer */
+  .progress-container {
+    width: 100%;
+    height: 8px;
+    background-color: #e5e7eb;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 4px;
+    transition: width 1s linear;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .word-list {
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Animation for new words */
+  @keyframes slideIn {
+    from {
+      transform: translateX(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .word-item.new {
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  /* Modal styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--modal-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+  }
+  
+  .modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .modal-content {
+    background: var(--card);
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  
+  .modal-overlay.show .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .modal-header {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+  
+  .modal-body {
+    margin-bottom: 2rem;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .modal-close {
+    padding: 0.75rem 2rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .modal-close:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+  
+  .result-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 1.5rem 0;
+  }
+  
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .medal-display {
+    margin: 1.5rem 0;
+  }
+  
+  .medal-img {
+    width: 120px;
+    height: 120px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  }
+  
+  /* Welcome modal */
+  .welcome-content {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="50" height="50" fill="%235383ec20"/><rect x="50" y="50" width="50" height="50" fill="%235383ec20"/></svg>');
+    background-color: var(--card);
+    padding: 2rem;
+  }
+  
+  .welcome-header {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+  }
+  
+  .instructions {
+    text-align: left;
+    margin-bottom: 1.5rem;
+  }
+  
+  .instructions li {
+    margin-bottom: 0.5rem;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  
+  .instructions li:before {
+    content: "";
+    color: var(--primary);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+  }
+
+  .game-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #4a66c7, #6d4fe8);
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 24px rgba(74, 102, 199, 0.3);
+    transform: rotate(-2deg);
+    position: relative;
+  }
+
+  .game-title::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(45deg, #6d4fe8, transparent);
+    border-radius: calc(var(--border-radius) + 5px);
+    z-index: -1;
+    opacity: 0.6;
+  }
+
+  .game-title span {
+    display: inline-block;
+    margin: 0 3px;
+    animation: float 3s ease-in-out infinite;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+  }
+
+  .game-title span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .game-title span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  .game-title span:nth-child(4) {
+    animation-delay: 0.6s;
+  }
+
+  .game-title span:nth-child(5) {
+    animation-delay: 0.8s;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+</style></head>
+<body>
+  <div class="game-title">
+    <span>W</span>
+    <span>O</span>
+    <span>R</span>
+    <span>D</span>
+    <span>GRID</span>
+  </div>
+  <button onclick="openWelcomeModal()" id="start-btn">Start Game</button>
+  
+  <div class="status-bar blur-before-start">
+    <div class="status-item">
+      <div class="status-label">TIME</div>
+      <div class="status-value" id="timer">90s</div>
+      <div class="progress-container">
+        <div class="progress-bar" id="timer-progress" style="width: 100%"></div>
+      </div>
+    </div>
+    <div class="status-item">
+      <div class="status-label">SCORE</div>
+      <div class="status-value" id="score">0</div>
+    </div>
+    <div class="status-item">
+      <div class="status-label">WORDS</div>
+      <div class="status-value" id="word-count">0</div>
+    </div>
+  </div>
+  
+  <!-- Welcome Modal -->
+  <div id="welcome-modal" class="modal-overlay">
+    <div class="modal-content welcome-content">
+      <div class="welcome-header">Welcome to Word Grid!</div>
+      <div class="instructions">
+        <p>Find as many words as you can before time runs out.</p>
+        <ul>
+          <li>Click on letters to form words</li>
+          <li>Words must be at least 2 letters long</li>
+          <li>Submit your word to earn points</li>
+          <li>Longer words earn more points</li>
+          <li>You have 90 seconds to find as many words as possible</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="startGame()">Let's Play!</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- End Game Modal -->
+  <div id="result-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">Game Over!</div>
+      <div class="modal-body">
+        <div class="result-stats">
+          <div class="stat-item">
+            <div class="stat-value" id="final-score">0</div>
+            <div class="stat-label">Score</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="final-words">0</div>
+            <div class="stat-label">Words Found</div>
+          </div>
+        </div>
+        <div class="medal-display" id="medal-display"></div>
+        <div id="result-message"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeResultModal()">Play Again</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container blur-before-start">
+    <div class="game-section">
+      <div class="grid" id="grid"></div>
+      <div id="word-display">Selected letters: </div>
+<div id="message"></div>
+<div class="medal-container" id="medal-container"></div>
+<div class="controls">
+  <button id="submit-btn" onclick="submitWord()">Submit Word</button>
+  <button id="reset-btn" onclick="resetGame()">New Game</button>
+</div>
+    </div>
+    <div class="word-list">
+      <h3>Found Words</h3>
+      <div class="found-words-container" id="found-words"></div>
+    </div>
+  </div>
+  <div class="author-credit"><a href="https://www.aaronshi.cc" target="_blank" rel="noopener noreferrer">
+            Created by Aaron Shi. V2.250506 <img src="https://alittlemoreenglish.weebly.com/uploads/2/6/6/3/26638990/favicon-32x32_orig.png" alt="Aaron Shi" width="15" height="15">
+        </a></div>
+
+<script>
+const grid = document.getElementById('grid');
+const wordDisplay = document.getElementById('word-display');
+const messageDisplay = document.getElementById('message');
+const scoreDisplay = document.getElementById('score');
+const timerDisplay = document.getElementById('timer');
+const timerProgress = document.getElementById('timer-progress');
+const medalContainer = document.getElementById('medal-container');
+const foundWordsContainer = document.getElementById('found-words');
+const wordCountDisplay = document.getElementById('word-count');
+const submitButton = document.getElementById('submit-btn');
+
+let score = 0;
+let usedWords = new Set();
+let timeLeft = 90;
+let maxTime = 90;
+let gameTimer;
+let selectedCells = [];
+let gameStarted = false;
+let isProcessingSubmission = false;
+
+const vowels = ['A', 'E', 'I', 'O', 'U'];
+const consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
+
+function generateRandomLetter() {
+    // Weighted random to ensure a good mix of vowels and consonants
+    return Math.random() < 0.35 ? 
+        vowels[Math.floor(Math.random() * vowels.length)] : 
+        consonants[Math.floor(Math.random() * consonants.length)];
+}
+
+function createGrid() {
+    grid.innerHTML = '';
+    let letters = [];
+    
+    // Ensure at least 4 vowels in the grid
+    for (let i = 0; i < 4; i++) {
+        letters.push(vowels[Math.floor(Math.random() * vowels.length)]);
+    }
+    
+    // Fill the rest with random letters
+    while (letters.length < 16) {
+        letters.push(generateRandomLetter());
+    }
+    
+    // Shuffle the letters
+    letters.sort(() => Math.random() - 0.5);
+    
+    letters.forEach(letter => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = letter;
+        cell.addEventListener('click', () => selectCell(cell));
+        grid.appendChild(cell);
+    });
+}
+
+function selectCell(cell) {
+    if (!gameStarted) return;
+    
+    const index = selectedCells.indexOf(cell);
+    if (index === -1) {
+        cell.classList.add('selected');
+        selectedCells.push(cell);
+    } else {
+        // If clicking the same cell, deselect everything
+        selectedCells.forEach(c => c.classList.remove('selected'));
+        selectedCells = [];
+    }
+    updateWordDisplay();
+    
+    // Hide message when selecting new cells
+    messageDisplay.classList.remove('show', 'success', 'error');
+}
+
+function updateWordDisplay() {
+    const word = selectedCells.map(cell => cell.textContent).join('');
+    wordDisplay.textContent = word.length > 0 ? 
+        `Selected: ${word}` : 
+        'Select letters to form a word';
+}
+
+function createMedal(type) {
+    return `<img src="${type}.png" alt="${type} medal" class="medal-img">`;
+}
+
+function showMedal() {
+    let medalType;
+    let message = '';
+    
+    // Lower the standards for medals
+    if (score >= 60) {
+        medalType = 'gold';
+        message = 'Congratulations! You\'ve earned a gold medal!';
+    } else if (score >= 40) {
+        medalType = 'silver';
+        message = 'Well done! You\'ve earned a silver medal!';
+    } else if (score >= 20) {
+        medalType = 'bronze';
+        message = 'Good job! You\'ve earned a bronze medal!';
+    } else {
+        message = 'Keep practicing! You can do better!';
+    }
+    
+    // Show the medal in the modal
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('final-words').textContent = usedWords.size;
+    document.getElementById('result-message').textContent = message;
+    
+    if (medalType) {
+        document.getElementById('medal-display').innerHTML = createMedal(medalType);
+    } else {
+        document.getElementById('medal-display').innerHTML = '';
+    }
+    
+    // Show the result modal
+    document.getElementById('result-modal').classList.add('show');
+}
+
+function updateTimer() {
+    timeLeft--;
+    const percentage = (timeLeft / maxTime) * 100;
+    
+    timerDisplay.textContent = `${timeLeft}s`;
+    timerProgress.style.width = `${percentage}%`;
+    
+    // Change color as time runs out
+    if (timeLeft <= 15) {
+        timerProgress.style.backgroundColor = '#f87171';
+    } else if (timeLeft <= 30) {
+        timerProgress.style.backgroundColor = '#fbbf24';
+    }
+    
+    if (timeLeft <= 0) {
+        endGame();
+    }
+}
+
+function endGame() {
+    clearInterval(gameTimer);
+    gameStarted = false;
+    document.getElementById('start-btn').style.display = 'block';  // Show the button
+    document.getElementById('start-btn').disabled = false;
+    submitButton.disabled = true;
+    showMedal();
+    document.body.classList.remove('game-started');
+}
+
+function closeResultModal() {
+    document.getElementById('result-modal').classList.remove('show');
+    resetGame();
+}
+
+function openWelcomeModal() {
+    document.getElementById('welcome-modal').classList.add('show');
+}
+
+function calculateWordScore(word) {
+    // More points for longer words
+    let baseScore = 0;
+    
+    if (word.length >= 7) baseScore = 20;
+    else if (word.length >= 5) baseScore = 15;
+    else if (word.length >= 3) baseScore = 10;
+    else baseScore = 5;
+    
+    return baseScore;
+}
+
+function addFoundWord(word, wordScore) {
+    const wordElement = document.createElement('div');
+    wordElement.className = 'word-item new';
+    
+    // Create word text and score badge
+    const wordSpan = document.createElement('span');
+    wordSpan.textContent = word;
+    
+    const scoreSpan = document.createElement('span');
+    scoreSpan.className = 'word-score';
+    scoreSpan.textContent = wordScore;
+    
+    wordElement.appendChild(wordSpan);
+    wordElement.appendChild(scoreSpan);
+    
+    // Insert at the top
+    if (foundWordsContainer.firstChild) {
+        foundWordsContainer.insertBefore(wordElement, foundWordsContainer.firstChild);
+    } else {
+        foundWordsContainer.appendChild(wordElement);
+    }
+    
+    // Update word count
+    wordCountDisplay.textContent = usedWords.size;
+}
+
+function showMessage(text, isSuccess = true) {
+    messageDisplay.textContent = text;
+    messageDisplay.classList.add('show');
+    
+    if (isSuccess) {
+        messageDisplay.classList.add('success');
+        messageDisplay.classList.remove('error');
+    } else {
+        messageDisplay.classList.add('error');
+        messageDisplay.classList.remove('success');
+    }
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+        messageDisplay.classList.remove('show');
+    }, 3000);
+}
+
+async function isValidWord(word) {
+    try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+        return response.ok;
+    } catch (error) {
+        console.error("API error:", error);
+        return false;
+    }
+}
+
+async function submitWord() {
+    if (!gameStarted || isProcessingSubmission) return;
+    
+    const word = selectedCells.map(cell => cell.textContent).join('');
+    if (word.length < 2) {
+        showMessage('Word must be at least 2 letters long!', false);
+        return;
+    }
+
+    if (usedWords.has(word)) {
+        showMessage('You already found this word!', false);
+        return;
+    }
+
+    // Set processing state to prevent multiple submissions
+    isProcessingSubmission = true;
+    submitButton.classList.add('processing');
+    
+    try {
+        const valid = await isValidWord(word);
+        
+        if (valid) {
+            const wordScore = calculateWordScore(word);
+            usedWords.add(word);
+            score += wordScore;
+            scoreDisplay.textContent = score;
+            showMessage(`Valid word! +${wordScore} points`, true);
+            addFoundWord(word, wordScore);
+        } else {
+            showMessage('Not a valid word!', false);
+        }
+    } catch (error) {
+        console.error("Error submitting word:", error);
+        showMessage('Something went wrong!', false);
+    } finally {
+        // Clear processing state
+        isProcessingSubmission = false;
+        submitButton.classList.remove('processing');
+        
+        // Clear selections
+        selectedCells.forEach(cell => cell.classList.remove('selected'));
+        selectedCells = [];
+        updateWordDisplay();
+    }
+}
+
+function startGame() {
+    if (!gameStarted) {
+        resetGame();
+        gameStarted = true;
+        document.getElementById('start-btn').style.display = 'none';  
+        document.body.classList.add('game-started');
+        submitButton.disabled = false;
+        gameTimer = setInterval(updateTimer, 1000);
+        
+        // Close welcome modal if open
+        document.getElementById('welcome-modal').classList.remove('show');
+    }
+}
+
+function resetGame() {
+    createGrid();
+    score = 0;
+    timeLeft = maxTime;
+    usedWords.clear();
+    selectedCells = [];
+    
+    scoreDisplay.textContent = score;
+    messageDisplay.textContent = '';
+    messageDisplay.classList.remove('show', 'success', 'error');
+    medalContainer.innerHTML = '';
+    foundWordsContainer.innerHTML = '';
+    wordDisplay.textContent = 'Select letters to form a word';
+    wordCountDisplay.textContent = '0';
+    
+    document.getElementById('start-btn').style.display = 'block';  // Show the button
+    document.getElementById('start-btn').disabled = false;
+    submitButton.disabled = true;
+    
+    clearInterval(gameTimer);
+    timerDisplay.textContent = `${maxTime}s`;
+    timerProgress.style.width = '100%';
+    timerProgress.style.backgroundColor = '#5383ec';
+    
+    // Only reset game status if it was already started
+    if (gameStarted) {
+        gameStarted = false;
+        document.body.classList.remove('game-started');
+    }
+}
+
+// Initialize the game
+createGrid();
+</script>
+</body></html>
